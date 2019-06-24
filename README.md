@@ -60,9 +60,9 @@ SHINY_PORT=80
 In the `.Renviron` file, make sure the `POSTGRES_PORT` in the `.env` file and the `db_port` match. Here is an example file that needs to be created inside the `/app` directory.
 
 ```
-db_host=mine-poligonization-app_db
+db_host=mva_db
 db_port=5454
-db_name=your-db-name
+db_name=mine_area
 db_user=app
 db_password=secret
 ```
@@ -82,7 +82,7 @@ There are two ways to run this app.
 4. Navigate to the root directory (`mine-poligonization-app`) with a shell of your choice and run the following command:
 `docker-compose up -d`
 
-Now both, the `mine-poligonization-app_app` (RShiny app) and the `mine-poligonization-app_db` (postgis database) should be running on ports specified in the `docker-compose.yml` on your localhost (e.g. ports `80` and `5454` respectively). To verify that both containers are running and the ports are correct, you can run `docker-compose ps` (in the root directory) or `docker ps` (anywhere).
+Now both, the `mva_app` (RShiny app) and the `mva_db` (postgis database) should be running on ports specified in the `docker-compose.yml` on your localhost (e.g. ports `80` and `5454` respectively). To verify that both containers are running and the ports are correct, you can run `docker-compose ps` (in the root directory) or `docker ps` (anywhere).
 
 You should now be able to see the app running at [localhost:80](localhost:80) or – if not `80` – at the port you specified in `SHINY_PORT`.
 
@@ -150,7 +150,7 @@ In case there are issues with building and running the RShiny Docker from the di
 ```YAML
     # build:
     #   context: ./docker-rshiny
-	image: fineprint/mine-poligonization-app
+    image: fineprint/mva
 ```
 
 ## Acknowledgement
