@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+         Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="0.9.1" last-position="0,0" last-zoom="0.8"
+	 default-schema="public" default-owner="postgres">
+<database name="io_db" is-template="false" allow-conns="true">
+</database>
+
+<schema name="public" fill-color="#e1e1e1" sql-disabled="true">
+</schema>
+
+<table name="type">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1460" y="600"/>
+	<column name="id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="type_pk" type="pk-constr" table="public.type">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="element">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1100" y="640"/>
+	<column name="id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="type" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<constraint name="element_pk" type="pk-constr" table="public.element">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="final_demand">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="580" y="700"/>
+	<column name="id" not-null="true">
+		<type name="bigint" length="0"/>
+	</column>
+	<column name="from_region" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="to_region" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="product" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="element">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="year" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="amount" not-null="true">
+		<type name="float" length="0"/>
+	</column>
+	<constraint name="y_pk" type="pk-constr" table="public.final_demand">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<extension name="postgis">
+	<schema name="public"/>
+</extension>
+
+<table name="region_cluster">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="20" y="960"/>
+	<column name="id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="region_cluster_pk" type="pk-constr" table="public.region_cluster">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="region">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="0" y="700"/>
+	<column name="id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="iso3">
+		<type name="text" length="0"/>
+	</column>
+	<column name="geometry">
+		<type name="geometry" length="0" spatial-type="MULTIPOLYGON" variation="0" srid="0"/>
+	</column>
+	<constraint name="region_pk" type="pk-constr" table="public.region">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="region_aggregate">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="0" y="380"/>
+	<column name="region_aggregate" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="region_in_aggregate" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<constraint name="region_aggregate_pk" type="pk-constr" table="public.region_aggregate">
+		<columns names="region_aggregate,region_in_aggregate" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="product_unit">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1360" y="260"/>
+	<column name="id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="product_unit_pk" type="pk-constr" table="public.product_unit">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="product">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1020" y="400"/>
+	<column name="id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="product_unit" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="other_id">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="product_pk" type="pk-constr" table="public.product">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="allocation">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="920" y="120"/>
+	<column name="id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="allocation_pk" type="pk-constr" table="public.allocation">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="env_factor">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="480" y="40"/>
+	<column name="id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="year" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="env_factor_unit" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="amount" not-null="true">
+		<type name="bigint" length="0"/>
+	</column>
+	<constraint name="env_factor_pk" type="pk-constr" table="public.env_factor">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="env_factor_unit">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="40" y="60"/>
+	<column name="id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="env_factor_unit_pk" type="pk-constr" table="public.env_factor_unit">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="input-output_leontief">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="480" y="340"/>
+	<column name="id" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="from_region" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="to_region" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="from_product" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="to_product" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="year" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="allocation" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="amount">
+		<type name="bigint" length="0"/>
+	</column>
+</table>
+
+<textbox name="type_desc" font-size="9">
+	<position x="1500" y="700"/>
+	<comment><![CDATA[food or nonfood]]></comment>
+</textbox>
+
+<textbox name="element" font-size="9">
+	<position x="1100" y="760"/>
+	<comment><![CDATA[food, stockchanges,
+or nonfood sector (households, state, etc.)]]></comment>
+</textbox>
+
+<textbox name="allocation_desc" font-size="9">
+	<position x="1020" y="220"/>
+	<comment><![CDATA[mass/price]]></comment>
+</textbox>
+
+<textbox name="env_factor_desc" font-size="9">
+	<position x="520" y="200"/>
+	<comment><![CDATA[potentially add total_production]]></comment>
+</textbox>
+
+<relationship name="many_region_cluster_has_many_region" type="relnn"
+	 src-col-pattern="{sc}_{st}" dst-col-pattern="{sc}_{dt}"
+	 pk-pattern="{gt}_pk" uq-pattern="{gt}_uq"
+	 src-fk-pattern="{st}_fk" dst-fk-pattern="{dt}_fk"
+	 pk-col-pattern="id"
+	 custom-color="#83af1f"
+	 src-table="public.region_cluster"
+	 dst-table="public.region"
+	 src-required="false" dst-required="false"
+	 table-name="many_region_cluster_has_many_region"/>
+
+<constraint name="type_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.type" table="public.element">
+	<columns names="type" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="element" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.element" table="public.final_demand">
+	<columns names="element" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="from_region_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.region" table="public.final_demand">
+	<columns names="from_region" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="to_region_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.region" table="public.final_demand">
+	<columns names="to_region" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="product_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.product" table="public.final_demand">
+	<columns names="product" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="region_aggregate_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.region" table="public.region_aggregate">
+	<columns names="region_aggregate" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="region_in_aggregate_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.region" table="public.region_aggregate">
+	<columns names="region_in_aggregate" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="product_unit_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.product_unit" table="public.product">
+	<columns names="product_unit" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="env_factor_unit_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.env_factor_unit" table="public.env_factor">
+	<columns names="env_factor_unit" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="from_region_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.region" table="public.&quot;input-output_leontief&quot;">
+	<columns names="from_region" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="to_region_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.region" table="public.&quot;input-output_leontief&quot;">
+	<columns names="to_region" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="from_product_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.product" table="public.&quot;input-output_leontief&quot;">
+	<columns names="from_product" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="to_product_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.product" table="public.&quot;input-output_leontief&quot;">
+	<columns names="to_product" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="allocation_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.allocation" table="public.&quot;input-output_leontief&quot;">
+	<columns names="allocation" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<relationship name="rel_element_type" type="relfk"
+	 src-table="public.element"
+	 dst-table="public.type" reference-fk="type_fk"
+	 src-required="false" dst-required="false">
+	<label ref-type="src-label">
+		<position x="0" y="0"/>
+	</label>
+	<label ref-type="dst-label">
+		<position x="0" y="0"/>
+	</label>
+</relationship>
+
+<relationship name="rel_final_demand_element" type="relfk"
+	 src-table="public.final_demand"
+	 dst-table="public.element" reference-fk="element"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="52.1092" y="-2.06668"/>
+	</label>
+</relationship>
+
+<relationship name="rel_region_aggregate_region" type="relfk"
+	 src-table="public.region_aggregate"
+	 dst-table="public.region" reference-fk="region_aggregate_fk"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_region_aggregate_region1" type="relfk"
+	 src-table="public.region_aggregate"
+	 dst-table="public.region" reference-fk="region_in_aggregate_fk"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_final_demand_region" type="relfk"
+	 src-table="public.final_demand"
+	 dst-table="public.region" reference-fk="from_region_fk"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="43.8161" y="-45.1448"/>
+	</label>
+</relationship>
+
+<relationship name="rel_final_demand_region1" type="relfk"
+	 src-table="public.final_demand"
+	 dst-table="public.region" reference-fk="to_region_fk"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="46.3161" y="5.26605"/>
+	</label>
+</relationship>
+
+<relationship name="rel_product_product_unit" type="relfk"
+	 src-table="public.product"
+	 dst-table="public.product_unit" reference-fk="product_unit_fk"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="19.9104" y="-25.0266"/>
+	</label>
+</relationship>
+
+<relationship name="rel_final_demand_product" type="relfk"
+	 src-table="public.final_demand"
+	 dst-table="public.product" reference-fk="product_fk"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_env_factor_env_factor_unit" type="relfk"
+	 src-table="public.env_factor"
+	 dst-table="public.env_factor_unit" reference-fk="env_factor_unit_fk"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="&quot;rel_input-output-leontief_region&quot;" type="relfk"
+	 src-table="public.&quot;input-output_leontief&quot;"
+	 dst-table="public.region" reference-fk="from_region_fk"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="&quot;rel_input-output-leontief_region1&quot;" type="relfk"
+	 src-table="public.&quot;input-output_leontief&quot;"
+	 dst-table="public.region" reference-fk="to_region_fk"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="&quot;rel_input-output-leontief_product&quot;" type="relfk"
+	 src-table="public.&quot;input-output_leontief&quot;"
+	 dst-table="public.product" reference-fk="from_product_fk"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="&quot;rel_input-output-leontief_product1&quot;" type="relfk"
+	 src-table="public.&quot;input-output_leontief&quot;"
+	 dst-table="public.product" reference-fk="to_product_fk"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="&quot;rel_input-output-leontief_allocation&quot;" type="relfk"
+	 src-table="public.&quot;input-output_leontief&quot;"
+	 dst-table="public.allocation" reference-fk="allocation_fk"
+	 src-required="false" dst-required="false"/>
+
+</dbmodel>
