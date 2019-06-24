@@ -1,7 +1,5 @@
-# your-web-app
-A quick description of your-web-app.
-
-**NOTE**: Make sure to replace all occurrences of `your-web-app` with the actual project name.
+# Mine vectorization application
+A web application to poligonize mine-areas in a given set of locations.
 
 The purpose of this project is to ... using R and PostgreSQL. There are two components, an R Shiny web application and a PostgreSQL Database (more specifically a postgis one). The network of those two components can be created with one single `docker-compose` command.
 
@@ -38,15 +36,13 @@ You only need R (version 3.5 or higher) and RStudio installed in case you would 
 If you are on a Linux machine, you need to install the following packages via `apt` (or any other package manager) as they are required by the R packages needed:
 `sudo apt install libpq-dev libssl-dev libxml2-dev libcurl4-openssl-dev`
 
-<NOTE: The packages mentioned above are for tidyverse, you may want to add more to fit your-web-app>
-
 The command to install the R packages can be found on the respective file you want to edit.
 
 ### Get the app
 To get the app, you can either
 
 - download the source using the "Clone or download"-button above
-- use `git clone https://github.com/fineprint-global/your-web-app.git`
+- use `git clone https://github.com/fineprint-global/mine-poligonization-app.git`
 
 ### Setup
 There are a few settings that you have to make before you can run the app.
@@ -64,7 +60,7 @@ SHINY_PORT=80
 In the `.Renviron` file, make sure the `POSTGRES_PORT` in the `.env` file and the `db_port` match. Here is an example file that needs to be created inside the `/app` directory.
 
 ```
-db_host=your-web-app_db
+db_host=mine-poligonization-app_db
 db_port=5454
 db_name=your-db-name
 db_user=app
@@ -75,7 +71,7 @@ db_password=secret
 There are two ways to run this app.
 
 1. You can run it as is, with a pre-loaded database.
-2. You can use your own data, which requires you to adapt the scripts in the [data-to-db](https://github.com/fineprint-global/your-web-app/tree/master/db/data-to-db) directory.
+2. You can use your own data, which requires you to adapt the scripts in the [data-to-db](https://github.com/fineprint-global/mine-poligonization-app/tree/master/db/data-to-db) directory.
 3. You can leave the database as is and change the visualizations.
 
 #### 1. Run as is
@@ -83,27 +79,27 @@ There are two ways to run this app.
 1. Make sure all necessary dependencies are installed.
 2. Make sure Docker (Desktop) is up and running.
 3. Make sure you completed the steps in [setup](#setup)
-4. Navigate to the root directory (`your-web-app`) with a shell of your choice and run the following command:
+4. Navigate to the root directory (`mine-poligonization-app`) with a shell of your choice and run the following command:
 `docker-compose up -d`
 
-Now both, the `your-web-app_app` (RShiny app) and the `your-web-app_db` (postgis database) should be running on ports specified in the `docker-compose.yml` on your localhost (e.g. ports `80` and `5454` respectively). To verify that both containers are running and the ports are correct, you can run `docker-compose ps` (in the root directory) or `docker ps` (anywhere).
+Now both, the `mine-poligonization-app_app` (RShiny app) and the `mine-poligonization-app_db` (postgis database) should be running on ports specified in the `docker-compose.yml` on your localhost (e.g. ports `80` and `5454` respectively). To verify that both containers are running and the ports are correct, you can run `docker-compose ps` (in the root directory) or `docker ps` (anywhere).
 
 You should now be able to see the app running at [localhost:80](localhost:80) or – if not `80` – at the port you specified in `SHINY_PORT`.
 
 If there are any problems, check out the [troubleshooting](#troubleshooting) section.
 
 #### 2. Use your own data
-More detailed instructions on this will come soon, but you will have to adjust the `main.R` located in the [data-to-db](https://github.com/fineprint-global/your-web-app/tree/master/db/data-to-db) directory to load your own input-output table and adjust it to the proper database format.
+More detailed instructions on this will come soon, but you will have to adjust the `main.R` located in the [data-to-db](https://github.com/fineprint-global/mine-poligonization-app/tree/master/db/data-to-db) directory to load your own input-output table and adjust it to the proper database format.
 
 ##### 2.1 Database format
 In order for your input-output table to be used with the Shiny app, you first need to adjust it to the database format used for this application.
 
-The database format can be found in the [db](https://github.com/fineprint-global/your-web-app/tree/master/db) folder in both `.dbm` format (to be viewed and edited via [pgmodeler](https://pgmodeler.io/)) and `.png` formats.
+The database format can be found in the [db](https://github.com/fineprint-global/mine-poligonization-app/tree/master/db) folder in both `.dbm` format (to be viewed and edited via [pgmodeler](https://pgmodeler.io/)) and `.png` formats.
 
 Check out the `main.R` file to see how our data was taken from `.rds` files and modified to fit the database format.
 
 #### 3. Change the visualizations
-The folders to take care of are the [app](https://github.com/fineprint-global/your-web-app/tree/master/app/) folder and the [docker-rshiny](https://github.com/fineprint-global/your-web-app/tree/master/docker-rshiny/) folder. The `app` folder will be used to change the visualizations whereas the `docker-rshiny` folder needs to be kept in mind for any new packages you might require.
+The folders to take care of are the [app](https://github.com/fineprint-global/mine-poligonization-app/tree/master/app/) folder and the [docker-rshiny](https://github.com/fineprint-global/mine-poligonization-app/tree/master/docker-rshiny/) folder. The `app` folder will be used to change the visualizations whereas the `docker-rshiny` folder needs to be kept in mind for any new packages you might require.
 
 ##### 3.1 `app` folder
 Before you dive into this, if you are new to RShiny, you may want to check out this [tutorial](https://shiny.rstudio.com/tutorial/).
@@ -116,7 +112,7 @@ In our example, the `app` folder is divided into 4 main files:
 - `server.R`: any new visualizations defined in the `ui.R` should be implemented in the `server.R`, this is where you collect your data, bring it into the correct format and then define the output-layout (e.g. for `plotly`).
 
 ##### 3.2 `docker-rshiny` folder for packages
-You need to edit the [Dockerfile](https://github.com/fineprint-global/your-web-app/tree/master/docker-rshiny/Dockerfile) if you add any new packages that are not included yet.
+You need to edit the [Dockerfile](https://github.com/fineprint-global/mine-poligonization-app/tree/master/docker-rshiny/Dockerfile) if you add any new packages that are not included yet.
 
 As an example, in this part of the Dockerfile …
 ```Dockerfile
@@ -140,7 +136,7 @@ RUN apt-get update \
 
 ### How to restart or stop the app
 - To restart the containers, run `docker-compose restart`
-- To stop the containers, move to the `your-web-app` directory and run `docker-compose stop`
+- To stop the containers, move to the `mine-poligonization-app` directory and run `docker-compose stop`
 - To stop containers and to remove containers, networks, volumes, and images created by `docker-compose up`, run `docker-compose down`
 
 ## Troubleshooting
@@ -154,7 +150,7 @@ In case there are issues with building and running the RShiny Docker from the di
 ```YAML
     # build:
     #   context: ./docker-rshiny
-	image: fineprint/your-web-app
+	image: fineprint/mine-poligonization-app
 ```
 
 ## Acknowledgement

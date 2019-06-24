@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   db:
-    container_name: your-web-app_db
+    container_name: mva_db
     build:
       context: ./docker-postgis
     restart: always
@@ -16,10 +16,10 @@ services:
       - ${POSTGRES_PORT}:5432
 
   app:
-    container_name: your-web-app_app
+    container_name: mva_app
     build:
       context: ./docker-rshiny
-    # image: fineprint/your-web-app
+    # image: fineprint/mva
     restart: always
     ports:
       - ${SHINY_PORT}:80
