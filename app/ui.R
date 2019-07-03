@@ -1,28 +1,25 @@
 ### ui.R
 
-# Define UI
-shinyUI(fluidPage(
-  
-  # Application title
-  titlePanel("Old Faithful Geyser Data"),
-  
-  tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
-  ),
-  
-  # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    sidebarPanel(
-       sliderInput("bins",
-                   "Number of bins:",
-                   min = 1,
-                   max = 50,
-                   value = 30)
+ui <- function(){
+  fluidPage(
+    theme = "bootstrap.min.css",
+    tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
     ),
-    
-    # Show a plot of the generated distribution
-    mainPanel(
-       plotOutput("distPlot")
+    fluidRow(
+      mapedit::editModUI("mine_edit", width = "100%", height = "100%")
+    ),
+    absolutePanel( id = "controls", class = "panel panel-default", fixed = TRUE,
+                   draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
+                   width = 250, height = "auto",
+                   h2("Global Mining-Vectorisation App"),
+                   wellPanel(
+                     # actionButton("btn_back", "Back", icon = icon("chevron-left")),
+                     actionButton("btn_help", "Help", icon = icon("ambulance")),
+                     actionButton("btn_next", "Next", icon = icon("chevron-right")),
+                     textAreaInput("ta_note", "Note"),
+                     shinyWidgets::progressBar(id = "pb_user", value = 0, display_pct = TRUE)
+                   )
     )
   )
-))
+}

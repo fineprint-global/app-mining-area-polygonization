@@ -1,0 +1,36 @@
+proxy:
+  title: FINEPRINT Shiny Proxy
+  logo-url: https://www.fineprint.global/wp-content/uploads/2017/10/fineprint_w_w.png
+  landing-page: /
+  heartbeat-rate: 10000
+  heartbeat-timeout: 60000
+  port: 8080
+  authentication: simple
+  admin-groups: admins
+  # Example: 'simple' authentication configuration
+  users:
+  - name: admin_x
+    password: axpw
+    groups: admins
+  - name: user_x
+    password: uxpw
+    groups: mining_users
+  - name: user_y
+    password: uypw
+    groups: mining_users
+  # Docker configuration
+  docker:
+    cert-path: /home/none
+    url: http://localhost:2375
+    port-range-start: 20000
+  specs:
+  - id: mva
+    display-name: Mine-Vectorization App
+    container-cmd: ["R", "-e", "shiny::runApp('/home/shiny/mva')"]
+    container-image: fineprint/mva-proxy
+    container-network: mine
+    access-group: [admins, mining_users]
+
+logging:
+  file:
+    /var/log/shinyproxy.log

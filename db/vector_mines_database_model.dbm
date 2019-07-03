@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+         Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="0.9.1" last-position="0,0" last-zoom="0.7"
+	 default-schema="public" default-owner="postgres">
+<role name="app"
+      login="true"
+      encrypted="true"
+      password="v&amp;@MMcU7g4mb">
+	<prepended-sql><![CDATA[DROP ROLE IF EXISTS app;]]></prepended-sql>
+</role>
+
+<database name="vector_mine" is-template="false" allow-conns="true" append-at-eod="true">
+	<role name="postgres"/>
+	<appended-sql><![CDATA[GRANT CONNECT ON DATABASE vector_mine TO app;
+GRANT SELECT ON mine_point TO app;
+GRANT SELECT ON mine_cluster TO app;
+GRANT SELECT ON app_user TO app;
+GRANT SELECT, INSERT, DELETE ON mine_polygon TO app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app;]]></appended-sql>
+</database>
+
+<schema name="public" fill-color="#e1e1e1" sql-disabled="true">
+</schema>
+
+<extension name="postgis">
+</extension>
+
+<table name="mine_polygon">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1060" y="140"/>
+	<column name="id" not-null="true">
+		<type name="bigserial" length="0"/>
+	</column>
+	<column name="geometry">
+		<type name="geometry" length="0" spatial-type="MULTIPOLYGON" variation="0" srid="0"/>
+	</column>
+	<column name="created_at" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="status" not-null="true">
+		<type name="varchar" length="10"/>
+	</column>
+	<column name="note">
+		<type name="text" length="250"/>
+	</column>
+	<column name="version" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="revision" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="seconds_spent" not-null="true">
+		<type name="float" length="0"/>
+	</column>
+	<constraint name="mine_polygon_pk" type="pk-constr" table="public.mine_polygon">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="id_app_user" index="9"/>
+		<object name="id_mine_cluster" index="8"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="app_user_fk" index="2"/>
+		<object name="mine_cluster_fk" index="1"/>
+	</customidxs>
+</table>
+
+<index name="idx_mine_polygon" table="public.mine_polygon"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+		<idxelement use-sorting="false">
+			<column name="id"/>
+		</idxelement>
+</index>
+
+<table name="mine_point">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="100" y="80"/>
+	<column name="id" not-null="true">
+		<type name="bigserial" length="0"/>
+	</column>
+	<column name="geometry" not-null="true">
+		<type name="geometry" length="0" spatial-type="POINT" variation="0" srid="0"/>
+	</column>
+	<column name="fp_id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="mine_name">
+		<type name="varchar" length="50"/>
+	</column>
+	<column name="country">
+		<type name="varchar" length="100"/>
+	</column>
+	<column name="list_of_commodities">
+		<type name="varchar" length="250"/>
+	</column>
+	<column name="development_stage">
+		<type name="varchar" length="50"/>
+	</column>
+	<column name="operating_status">
+		<type name="varchar" length="50"/>
+	</column>
+	<column name="coordinate_accuracy">
+		<type name="varchar" length="20"/>
+	</column>
+	<column name="known_as">
+		<type name="text" length="256"/>
+	</column>
+	<column name="mine_type">
+		<type name="varchar" length="50"/>
+	</column>
+	<constraint name="mine_point_pk" type="pk-constr" table="public.mine_point">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="id_mine_cluster" index="11"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="mine_cluster_fk" index="1"/>
+	</customidxs>
+</table>
+
+<index name="idx_geom_polygon" table="public.mine_polygon"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="gist" factor="0">
+		<idxelement use-sorting="false">
+			<column name="geometry"/>
+		</idxelement>
+</index>
+
+<index name="idx_mine_point" table="public.mine_point"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+		<idxelement use-sorting="false">
+			<column name="id"/>
+		</idxelement>
+</index>
+
+<index name="idx_geom_point" table="public.mine_point"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="gist" factor="0">
+		<idxelement use-sorting="false">
+			<column name="geometry"/>
+		</idxelement>
+</index>
+
+<table name="mine_cluster">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="600" y="60"/>
+	<column name="id" not-null="true">
+		<type name="bigserial" length="0"/>
+	</column>
+	<constraint name="mine_cluster_pk" type="pk-constr" table="public.mine_cluster">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<index name="idx_mine_cluster" table="public.mine_cluster"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+		<idxelement use-sorting="false">
+			<column name="id"/>
+		</idxelement>
+</index>
+
+<relationship name="mine_cluster_has_many_mine_point" type="rel1n"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#0d1a7c"
+	 src-table="public.mine_cluster"
+	 dst-table="public.mine_point"
+	 src-required="true" dst-required="false">
+	<label ref-type="name-label">
+		<position x="8.52092" y="-18.3664"/>
+	</label>
+</relationship>
+
+<relationship name="mine_cluster_has_many_mine_polygons" type="rel1n"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#597ffe"
+	 src-table="public.mine_cluster"
+	 dst-table="public.mine_polygon"
+	 src-required="true" dst-required="false">
+	<label ref-type="name-label">
+		<position x="3.34257" y="11.6168"/>
+	</label>
+</relationship>
+
+<table name="app_user">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="600" y="380"/>
+	<column name="id" not-null="true">
+		<type name="char" length="7"/>
+	</column>
+	<constraint name="app_user_pk" type="pk-constr" table="public.app_user">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="app_users_has_many_mine_polygons" type="rel1n"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#ec2a62"
+	 src-table="public.app_user"
+	 dst-table="public.mine_polygon"
+	 src-required="true" dst-required="false"/>
+
+<relationship name="app_user_has_many_mine_cluster" type="rel1n"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#8390c5"
+	 src-table="public.app_user"
+	 dst-table="public.mine_cluster"
+	 src-required="true" dst-required="false">
+	<label ref-type="name-label">
+		<position x="0" y="0"/>
+	</label>
+</relationship>
+
+</dbmodel>

@@ -14,18 +14,26 @@ services:
       - ./db/data/:/mnt/
     ports:
       - ${POSTGRES_PORT}:5432
+    networks:
+      - mine
 
-  app:
-    container_name: mva_app
-    build:
-      context: ./docker-rshiny
-    # image: fineprint/mva
-    restart: always
-    ports:
-      - ${SHINY_PORT}:80
-    volumes:
-      - ./app:/srv/shiny-server
+#  app:
+#    container_name: mva_app
+#    build:
+#      context: ./docker-rshiny
+#    # image: fineprint/mva
+#    restart: always
+#    ports:
+#      - ${SHINY_PORT}:80
+#    volumes:
+#      - ./app:/srv/shiny-server
+#    networks:
+#      - mine
 
 volumes:
   pgdata:
     driver: local
+
+networks:
+  mine:
+    name: mine

@@ -1,1 +1,30 @@
-/* Defines styles used in the shiny app. */
+h1 { 
+  text-align: center; 
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+h2 { 
+  text-align: center; 
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+a.leaflet-draw-draw-polyline,
+a.leaflet-draw-draw-rectangle,
+a.leaflet-draw-draw-marker,
+a.leaflet-draw-draw-circlemarker{
+  display: none !important;
+}
+
+#mine_edit-map {height: 100vh !important} /*calc(70vh - 80px) !important;}*/
+
+#shiny-modal .modal-dialog{
+  margin-top: 10rem;
+}
+#shiny-modal .modal-body .shiny-input-container{
+  width: 100%;
+}
+
+
+#controls .action-button {width: 48.5%;}

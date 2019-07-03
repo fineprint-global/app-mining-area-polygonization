@@ -42,3 +42,9 @@ rsconnect/
 # Ignore files that store confidential information
 .env
 *.Renviron
+shinyproxy/application-server.yml
+
+# Ignore files containing information we are not able to publish yet
+db/input/*
+db/data/pg_dump.sql
+db/data/mva*.sql
