@@ -1,3 +1,5 @@
+# --------------------------------------------------------------------------------------
+# this script creates a release version of the mining polygons -------------------------
 library(tidyverse)
 library(sf)
 library(units)
@@ -13,14 +15,14 @@ output_dsn <- "./global_mining_polygons_v1r5.gpkg"
 # --------------------------------------------------------------------------------------
 # get raw data from PostGIS database ---------------------------------------------------
 conn <- DBI::dbConnect(RPostgreSQL::PostgreSQL(),
-                       host = Sys.getenv("db_host"),
-                       port = Sys.getenv("db_port"),
-                       dbname = Sys.getenv("db_name"),
-                       user = Sys.getenv("db_user"),
-                       password = Sys.getenv("db_password"))
+                      host = Sys.getenv("db_host"),
+                      port = Sys.getenv("db_port"),
+                      dbname = Sys.getenv("db_name"),
+                      user = Sys.getenv("db_user"),
+                      password = Sys.getenv("db_password"))
 
 raw_mining_polygons <- sf::st_read(conn, "mine_polygon")
-
+  
 # --------------------------------------------------------------------------------------
 # clean overlaps, invalid shapes, and islands smaller than 1ha -------------------------
 mining_polygons <- raw_mining_polygons %>% 
@@ -36,15 +38,16 @@ mining_polygons <- raw_mining_polygons %>%
   dplyr::filter(is_poly) %>%
   dplyr::select(-is_poly) %>% 
   sf::st_transform("+proj=laea +datum=WGS84")
-  
+
 # --------------------------------------------------------------------------------------
 # join mining polygons to country names ------------------------------------------------
-mining_polygons <- rnaturalearth::ne_countries(scale = 'small') %>% 
+mining_polygons2 <- rnaturalearth::ne_countries(scale = 'small') %>% 
   sf::st_as_sf() %>% 
   dplyr::select(COUNTRY = name, ISO_A3 = iso_a3, CONTINENT = continent) %>% 
   sf::st_transform("+proj=laea +datum=WGS84") %>% 
-  sf::st_join(y = mining_polygons,
-              left = FALSE, 
+  sf::st_join(x = mining_polygons,
+              y = .,
+              left = TRUE, 
               join = nngeo::st_nn, 
               sparse = TRUE, 
               k = 1, 
@@ -53,10 +56,10 @@ mining_polygons <- rnaturalearth::ne_countries(scale = 'small') %>%
 
 # --------------------------------------------------------------------------------------
 # calculate mining area in km^2 --------------------------------------------------------
-mining_polygons <- mining_polygons %>% 
+mining_polygons2 <- mining_polygons2 %>% 
   sf::st_transform("+proj=longlat +datum=WGS84") %>% 
   dplyr::mutate(
-    AREA = purrr::map_dbl(.x = geom, crs = sf::st_crs(.), .pb = dplyr::progress_estimated(length(geom)), 
+    AREA = purrr::map_dbl(.x = geometry, crs = sf::st_crs(.), .pb = dplyr::progress_estimated(length(geometry)), 
                           .f = function(x, crs, .pb = NULL) {
                             if(!is.null(.pb)) .pb$tick()$print()
                             sf::st_sfc(x, crs = crs) %>% 
@@ -66,6 +69,5 @@ mining_polygons <- mining_polygons %>%
                             })
     ) 
 
-sf::st_write(mining_polygons, dsn = output_dsn)
+sf::st_write(mining_polygons2, dsn = output_dsn, delete_dsn = TRUE)
 DBI::dbDisconnect(conn)
-
