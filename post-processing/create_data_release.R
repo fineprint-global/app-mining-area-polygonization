@@ -22,7 +22,9 @@ conn <- DBI::dbConnect(RPostgreSQL::PostgreSQL(),
                       password = Sys.getenv("db_password"))
 
 raw_mining_polygons <- sf::st_read(conn, "mine_polygon")
-  
+
+DBI::dbDisconnect(conn)
+
 # --------------------------------------------------------------------------------------
 # clean overlaps, invalid shapes, and islands smaller than 1ha -------------------------
 mining_polygons <- raw_mining_polygons %>% 
@@ -70,4 +72,4 @@ mining_polygons <- mining_polygons %>%
     ) 
 
 sf::st_write(mining_polygons, dsn = output_dsn, delete_dsn = TRUE)
-DBI::dbDisconnect(conn)
+
