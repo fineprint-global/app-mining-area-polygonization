@@ -1,6 +1,6 @@
-# Web application to delineate mining areas
+# Web application for mining areas polygonization [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3580740.svg)](https://doi.org/10.5281/zenodo.3580740)
 
-This web application supports the delineation of mining areas using satellite images given a set of approximate locations where mining may occur. The app systematically displays the mining locations and several background options of satellite images, which the users can take into account to draw and edit polygons.
+This web application supports the delineation (polygonization) of mining areas using satellite images given a set of approximate locations where mining may occur. The app systematically displays the mining locations and several background options of satellite images, which the users can take into account to draw and edit polygons.
 
 The app is built in R Shiny with a PostgreSQL Database and PostGIS extension. The app and database can either be created with one single `docker-compose` command or, **the application the current setup is targeting:**, the database is set up using `docker-compose`, and the application itself is **deployed via shinyproxy** in order to allow user management and password protection (see details below).
 
