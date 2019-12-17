@@ -46,7 +46,7 @@ To use the app with ShinyProxy, create a database with `docker-compose` and depl
 To get the app, you can either
 
 - download the source using the "Clone or download"-button above
-- use `git clone https://github.com/fineprint-global/mine-poligonization-app.git`
+- use `git clone https://github.com/fineprint-global/app-mining-area-polygonization.git`
 
 ### Setup
 There are a few settings that you have to make before you can run the app.
@@ -90,7 +90,7 @@ db_admin_password=postgresuserpassword
 1. Make sure all necessary dependencies are installed.
 2. Make sure Docker (Desktop) is up and running.
 3. Make sure you completed the steps in [setup](#setup)
-4. Navigate to the root directory (`mine-poligonization-app`) with a shell of your choice and run the following command:
+4. Navigate to the root directory (`app-mining-area-polygonization`) with a shell of your choice and run the following command:
 `docker-compose up -d`
 
 Now both, the `mva_app` (RShiny app) and the `mva_db` (postgis database) should be running on ports specified in the `docker-compose.yml` on your localhost (e.g. ports `80` and `5454` respectively). To verify that both containers are running and the ports are correct, you can run `docker-compose ps` (in the root directory) or `docker ps` (anywhere).
@@ -120,7 +120,7 @@ You need to edit the [Dockerfile](docker-rshiny/Dockerfile) if you add any new p
 
 ### How to restart or stop the app
 - To restart the containers, run `docker-compose restart`
-- To stop the containers, move to the `mine-poligonization-app` directory and run `docker-compose stop`
+- To stop the containers, move to the `app-mining-area-polygonization` directory and run `docker-compose stop`
 - To stop containers and to remove containers, networks, volumes, and images created by `docker-compose up`, run `docker-compose down`
 
 ## Troubleshooting
