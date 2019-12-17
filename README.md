@@ -118,6 +118,9 @@ Our app is divided into 4 main files:
 ##### 3.2 `docker-rshiny` folder for packages
 You need to edit the [Dockerfile](docker-rshiny/Dockerfile) if you add any new packages that are not included yet.
 
+##### 3.3 `post-processing` folder
+This folder contains the R scripts to create a mining polygons data release. 
+
 ### How to restart or stop the app
 - To restart the containers, run `docker-compose restart`
 - To stop the containers, move to the `app-mining-area-polygonization` directory and run `docker-compose stop`
