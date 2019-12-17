@@ -1,9 +1,10 @@
-# Mine vectorization application
-A web application to poligonize mine-areas in a given set of locations.
+# Web application to delineate mining areas
 
-The purpose of this project is to vectorize/poligonize mine-areas using R and PostgreSQL. There are two components, an R Shiny web application and a PostgreSQL Database (more specifically a postgis one). The network of those two components can either be created with one single `docker-compose` command or, **the application the current setup is targeting:**, the database is set up using `docker-compose` and the application itself is **deployed via shinyproxy** in order to allow user management and password protection.
+This web application supports the delineation of mining areas using satellite images given a set of approximate locations where mining may occur. The app systematically displays the mining locations and several background options of satellite images, which the users can take into account to draw and edit polygons.
 
-As a note: We cannot yet publish our mine-location data, but you can still use this app with the database model or the [create_db_schema.sql](db/data/create_db_schema.sql) script and populate it yourself.
+The app is built in R Shiny with a PostgreSQL Database and PostGIS extension. The app and database can either be created with one single `docker-compose` command or, **the application the current setup is targeting:**, the database is set up using `docker-compose`, and the application itself is **deployed via shinyproxy** in order to allow user management and password protection (see details below).
+
+Note: The app requires a database as defined in [create_db_schema.sql](db/data/create_db_schema.sql). The database must be populated with approximate mining locations and other information about the mines.
 
 ## Usage
 1. [Dependencies](#dependencies)
@@ -39,7 +40,7 @@ If you are on a Linux machine, you need to install the following packages via `a
 The command to install the R packages can be found on the respective file you want to edit.
 
 #### ShinyProxy
-In case you would like to use the app like we do, with a database created with `docker-compose` and the app deployed within a ShinyProxy environment, refer to our brief [shinyproxy-documentation](shinyproxy/README.md).
+To use the app with ShinyProxy, create a database with `docker-compose` and deploy the app within a ShinyProxy environment, refer to our brief [shinyproxy-documentation](shinyproxy/README.md).
 
 ### Get the app
 To get the app, you can either
@@ -99,14 +100,7 @@ You should now be able to see the app running at [localhost:80](localhost:80) or
 If there are any problems, check out the [troubleshooting](#troubleshooting) section.
 
 #### 2. Use your own data
-More detailed instructions on this will come soon, but you will have to adjust the `main.R` located in the [data-to-db](db/data-to-db) directory to load your own input-output table and adjust it to the proper database format.
-
-##### 2.1 Database format
-In order for your input-output table to be used with the Shiny app, you first need to adjust it to the database format used for this application.
-
-The database format can be found in the [db](db) folder in both `.dbm` format (to be viewed and edited via [pgmodeler](https://pgmodeler.io/)) and `.png` formats.
-
-Check out the `main.R` file to see how our data was taken from `.rds` files and modified to fit the database format.
+More detailed instructions on this will come soon, but you will have to adjust the `insert_mines_to_db.R` located in the [data-to-db](db/data-to-db) directory to load your own input-output table and adjust it to the proper database format.
 
 #### 3. Change the visualizations
 The folders to take care of are the [app](app/) folder and the [docker-rshiny](docker-rshiny/) folder. The `app` folder will be used to change the visualizations whereas the `docker-rshiny` folder needs to be kept in mind for any new packages you might require.
@@ -114,7 +108,7 @@ The folders to take care of are the [app](app/) folder and the [docker-rshiny](d
 ##### 3.1 `app` folder
 Before you dive into this, if you are new to RShiny, you may want to check out this [tutorial](https://shiny.rstudio.com/tutorial/).
 
-In our example, the `app` folder is divided into 4 main files:
+Our app is divided into 4 main files:
 
 - `app.R`: you should not need to add anything there, this just brings all three other files together
 - `global.R`: this will be executed once for every worker process, not for every user, so this is where you specify database connections and perform other setup-related tasks
@@ -123,26 +117,6 @@ In our example, the `app` folder is divided into 4 main files:
 
 ##### 3.2 `docker-rshiny` folder for packages
 You need to edit the [Dockerfile](docker-rshiny/Dockerfile) if you add any new packages that are not included yet.
-
-As an example, in this part of the Dockerfile …
-```Dockerfile
-...
-# Install a few dependencies for packages
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
-  && install2.r --error \
-    plotly \
-    RPostgreSQL \
-    pool
-...
-```
-… you could edit it to include `leaflet` to add map functionalities:
-```Dockerfile
-    ...
-    pool \
-    leaflet
-...
-```
 
 ### How to restart or stop the app
 - To restart the containers, run `docker-compose restart`
@@ -164,4 +138,4 @@ In case there are issues with building and running the RShiny Docker from the di
 ```
 
 ## Acknowledgement
-This project gratefully acknowledges financial support from the ERC as part of the [FINEPRINT](https://www.fineprint.global/) project.
+This work was supported by the European Research Council (ERC) under the European Union's Horizon 2020 research and innovation programme grant number 725525 [FINEPRINT](https://www.fineprint.global/) project. 
