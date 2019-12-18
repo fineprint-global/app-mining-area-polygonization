@@ -45,7 +45,7 @@ mining_polygons <- raw_mining_polygons %>%
 # join mining polygons to country names ------------------------------------------------
 mining_polygons <- rnaturalearth::ne_countries(scale = 'small') %>% 
   sf::st_as_sf() %>% 
-  dplyr::select(COUNTRY = name, ISO_A3 = iso_a3, CONTINENT = continent) %>% 
+  dplyr::select(ISO3_CODE = iso_a3, COUNTRY_NAME = name, CONTINENT = continent) %>% 
   sf::st_transform("+proj=laea +datum=WGS84") %>% 
   sf::st_join(x = mining_polygons,
               y = .,
