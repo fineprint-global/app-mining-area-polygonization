@@ -1,16 +1,19 @@
 # --------------------------------------------------------------------------------------
 # this script creates a release version of the mining polygons -------------------------
-library(tidyverse)
-library(sf)
-library(units)
-library(lwgeom)
-library(rmapshaper)
-library(nngeo)
+# define release version ---------------------------------------------------------------
+release_version <- "v1"
+
+# --------------------------------------------------------------------------------------
+# required packages --------------------------------------------------------------------
 library(rnaturalearth)
 library(gfcanalysis)
 library(RPostgreSQL)
-
-output_dsn <- "./global_mining_polygons_v1r5.gpkg"
+library(rmapshaper)
+library(tidyverse)
+library(lwgeom)
+library(units)
+library(nngeo)
+library(sf)
 
 # --------------------------------------------------------------------------------------
 # get raw data from PostGIS database ---------------------------------------------------
@@ -29,6 +32,7 @@ DBI::dbDisconnect(conn)
 # clean overlaps, invalid shapes, and islands smaller than 1ha -------------------------
 mining_polygons <- raw_mining_polygons %>% 
   sf::st_geometry() %>% 
+  sf::st_transform("+proj=laea +datum=WGS84") %>% 
   rmapshaper::ms_explode(sys = TRUE) %>% 
   rmapshaper::ms_dissolve(snap = TRUE, sys = TRUE) %>% 
   rmapshaper::ms_clip(bbox = c(-180, -90, 180, 90), sys = TRUE) %>% 
@@ -38,8 +42,7 @@ mining_polygons <- raw_mining_polygons %>%
   sf::st_sf() %>% 
   dplyr::mutate(is_poly = sf::st_is(geometry, "POLYGON")) %>%
   dplyr::filter(is_poly) %>%
-  dplyr::select(-is_poly) %>% 
-  sf::st_transform("+proj=laea +datum=WGS84")
+  dplyr::select(-is_poly) 
 
 # --------------------------------------------------------------------------------------
 # join mining polygons to country names ------------------------------------------------
@@ -71,5 +74,8 @@ mining_polygons <- mining_polygons %>%
                             })
     ) 
 
-sf::st_write(mining_polygons, dsn = output_dsn, delete_dsn = TRUE)
+# --------------------------------------------------------------------------------------
+# write release data to GeoPackage -----------------------------------------------------
+sf::st_write(mining_polygons, layer = "mining_polygons", 
+             dsn = paste0("./global_mining_polygons_",release_version,".gpkg"), delete_dsn = TRUE)
 
