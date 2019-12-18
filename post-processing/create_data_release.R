@@ -8,7 +8,6 @@ release_version <- "v1"
 library(rnaturalearth)
 library(gfcanalysis)
 library(RPostgreSQL)
-library(rmapshaper)
 library(tidyverse)
 library(lwgeom)
 library(units)
@@ -29,20 +28,17 @@ raw_mining_polygons <- sf::st_read(conn, "mine_polygon")
 DBI::dbDisconnect(conn)
 
 # --------------------------------------------------------------------------------------
-# clean overlaps, invalid shapes, and islands smaller than 1ha -------------------------
+# clean overlaps, invalid shapes, and holes smaller than 1ha ---------------------------
 mining_polygons <- raw_mining_polygons %>% 
+  dplyr::filter(!st_is_empty(.)) %>% 
   sf::st_geometry() %>% 
-  sf::st_transform("+proj=laea +datum=WGS84") %>% 
-  rmapshaper::ms_explode(sys = TRUE) %>% 
-  rmapshaper::ms_dissolve(snap = TRUE, sys = TRUE) %>% 
-  rmapshaper::ms_clip(bbox = c(-180, -90, 180, 90), sys = TRUE) %>% 
-  rmapshaper::ms_filter_islands(min_area = 10000, sys = TRUE) %>% 
-  rmapshaper::ms_explode(sys = TRUE) %>% 
   lwgeom::st_make_valid() %>% 
+  sf::st_transform("+proj=laea +datum=WGS84") %>%
+  sf::st_union() %>% 
+  sf::st_cast("POLYGON") %>% 
   sf::st_sf() %>% 
-  dplyr::mutate(is_poly = sf::st_is(geometry, "POLYGON")) %>%
-  dplyr::filter(is_poly) %>%
-  dplyr::select(-is_poly) 
+  dplyr::filter(sf::st_is(geometry, "POLYGON")) %>% 
+  smoothr::fill_holes(units::set_units(1, ha)) 
 
 # --------------------------------------------------------------------------------------
 # join mining polygons to country names ------------------------------------------------
