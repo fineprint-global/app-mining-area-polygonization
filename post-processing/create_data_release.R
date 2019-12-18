@@ -30,7 +30,7 @@ DBI::dbDisconnect(conn)
 # --------------------------------------------------------------------------------------
 # clean overlaps, invalid shapes, and holes smaller than 1ha ---------------------------
 mining_polygons <- raw_mining_polygons %>% 
-  dplyr::filter(!st_is_empty(.)) %>% 
+  dplyr::filter(!sf::st_is_empty(.)) %>% 
   sf::st_geometry() %>% 
   lwgeom::st_make_valid() %>% 
   sf::st_transform("+proj=laea +datum=WGS84") %>%
