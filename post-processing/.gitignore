@@ -1,3 +1,6 @@
 *.Rout
 *.Renviron
 *.gpkg
+*.zip
+*.geojson
+*.csv
