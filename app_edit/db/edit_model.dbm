@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+         Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="0.9.2" last-position="0,0" last-zoom="0.7" max-obj-count="4"
+	 default-schema="public" default-owner="postgres">
+<role name="app"
+      login="true"
+      encrypted="true"
+      password="v&amp;@MMcU7g4mb">
+	<prepended-sql><![CDATA[DROP ROLE IF EXISTS app;]]></prepended-sql>
+</role>
+
+<database name="vector_mine_edit" is-template="false" allow-conns="true" append-at-eod="true">
+	<role name="postgres"/>
+	<appended-sql><![CDATA[GRANT CONNECT ON DATABASE vector_mine_edit TO app;
+GRANT SELECT, UPDATE ON to_update TO app;
+GRANT SELECT, INSERT ON updated TO app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app;]]></appended-sql>
+</database>
+
+<schema name="public" layer="0" fill-color="#e1e1e1" sql-disabled="true">
+</schema>
+
+<extension name="postgis">
+</extension>
+
+<table name="to_update" layer="0" collapse-mode="2" max-obj-count="4">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="100" y="80"/>
+	<column name="id" not-null="true">
+		<type name="bigserial" length="0"/>
+	</column>
+	<column name="geometry" not-null="true">
+		<type name="geometry" length="0" spatial-type="POLYGON" variation="0" srid="0"/>
+	</column>
+	<column name="to_check" not-null="true">
+		<type name="boolean" length="0"/>
+	</column>
+	<column name="status" not-null="true">
+		<type name="varchar" length="10"/>
+	</column>
+	<constraint name="to_update_pk" type="pk-constr" table="public.to_update">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<index name="idx_to_update" table="public.to_update"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+		<idxelement use-sorting="false">
+			<column name="id"/>
+		</idxelement>
+</index>
+
+<index name="idx_to_update_geom_poly" table="public.to_update"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="gist" factor="0">
+		<idxelement use-sorting="false">
+			<column name="geometry"/>
+		</idxelement>
+</index>
+
+<table name="updated" layer="0" collapse-mode="2" max-obj-count="3">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="561.25" y="86.25"/>
+	<column name="id" not-null="true">
+		<type name="bigserial" length="0"/>
+	</column>
+	<column name="geometry">
+		<type name="geometry" length="0" spatial-type="MULTIPOLYGON" variation="0" srid="0"/>
+	</column>
+	<constraint name="updated_pk" type="pk-constr" table="public.updated">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="id_to_update" index="2"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="to_update_fk" index="1"/>
+	</customidxs>
+</table>
+
+<index name="idx_updated" table="public.updated"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+		<idxelement use-sorting="false">
+			<column name="id"/>
+		</idxelement>
+</index>
+
+<index name="idx_updated_geom_poly" table="public.updated"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="gist" factor="0">
+		<idxelement use-sorting="false">
+			<column name="geometry"/>
+		</idxelement>
+</index>
+
+<relationship name="to_update_has_many_updated" type="rel1n" layer="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#a57d0d"
+	 src-table="public.to_update"
+	 dst-table="public.updated"
+	 src-required="true" dst-required="false"/>
+
+<textbox name="Note status" layer="0" font-size="9">
+	<position x="80" y="267.5"/>
+	<comment><![CDATA[status: DONT_CHECK, TO_CHECK, CHECKED, HOLD]]></comment>
+</textbox>
+
+</dbmodel>
