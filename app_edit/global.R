@@ -64,10 +64,6 @@ get_next_polygon <- function(){
            Please get in contact with your supervisor!")
   }
   
-  # NOW, put on hold
-  
-  ## TODO
-  
   return(next_poly)
 }
 
