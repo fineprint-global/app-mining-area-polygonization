@@ -1,7 +1,5 @@
 # --------------------------------------------------------------------------------------
 # this script creates a release version of the mining polygons -------------------------
-# define release version ---------------------------------------------------------------
-release_version <- "v1"
 
 # --------------------------------------------------------------------------------------
 # required packages --------------------------------------------------------------------
@@ -12,18 +10,22 @@ library(lwgeom)
 library(units)
 library(nngeo)
 library(sf)
+library(raster)
+readRenviron(".Renviron")
+
+# define release version ---------------------------------------------------------------
+release_version <- "v1"
 
 # --------------------------------------------------------------------------------------
 # get raw data from PostGIS database ---------------------------------------------------
 conn <- DBI::dbConnect(RPostgreSQL::PostgreSQL(),
-                      host = Sys.getenv("db_host"),
-                      port = Sys.getenv("db_port"),
-                      dbname = Sys.getenv("db_name"),
-                      user = Sys.getenv("db_user"),
-                      password = Sys.getenv("db_password"))
+                       host = Sys.getenv("db_host"),
+                       port = Sys.getenv("db_port"),
+                       dbname = Sys.getenv("db_name"),
+                       user = Sys.getenv("db_user"),
+                       password = Sys.getenv("db_password"))
 
 raw_mining_polygons <- sf::st_read(conn, "mine_polygon")
-raw_mining_polygons <- sf::st_read("global_mining_polygons_v1r5_raw.gpkg")
 DBI::dbDisconnect(conn)
 
 # --------------------------------------------------------------------------------------
@@ -78,7 +80,7 @@ country_names <- mining_polygons %>%
   dplyr::ungroup() %>% 
   dplyr::select(-area) %>% 
   dplyr::bind_rows(country_names)
-  
+
 # correct for missing intersection by selecting the closest country
 country_names <- world_map %>% 
   dplyr::slice(sf::st_nearest_feature(mining_polygons[which(sapply(ids_intersects, length) < 1),], .)) %>% 
@@ -100,13 +102,14 @@ mining_polygons <- mining_polygons %>%
                               sf::st_transform(gfcanalysis::utm_zone(sf::as_Spatial(.), proj4string = TRUE)) %>%
                               sf::st_area() %>%
                               units::set_units(km^2)
-                            })
-    ) 
+                          })
+  ) 
 
 # --------------------------------------------------------------------------------------
 # write release data to GeoPackage -----------------------------------------------------
+path_to_mining_polygons <- paste0("./global_mining_polygons_",release_version,".gpkg")
 sf::st_write(mining_polygons, layer = "mining_polygons", 
-             dsn = paste0("./global_mining_polygons_",release_version,".gpkg"), delete_dsn = TRUE)
+             dsn = path_to_mining_polygons, delete_dsn = TRUE)
 
 # --------------------------------------------------------------------------------------
 # write summary of mining aea per country in (km2) -------------------------------------
@@ -120,4 +123,24 @@ mining_polygons %>%
   dplyr::arrange(dplyr::desc(AREA)) %>% 
   readr::write_csv(paste0("./global_mining_area_per_country_",release_version,".csv"))
 
+# --------------------------------------------------------------------------------------
+# create 30sec global grid with a percentage of mining coverage per cell ---------------
+# For help see: system("./calculate_area_weights.py -h")
+tmp_file <- tempfile(pattern = "file", tmpdir = tempdir(), fileext = ".tif")
+system.time(system(paste0("./calculate_area_weights.py \\
+                          -i ",path_to_mining_polygons," \\
+                          -o ",tmp_file," \\
+                          -xmin ",  -180," \\
+                          -xmax ",   180," \\
+                          -ymin ",   -90," \\
+                          -ymax ",    90," \\
+                          -ncol ", 43200," \\
+                          -nrow ", 21600)))
 
+path_to_land_mask_raster <- Sys.getenv("path_to_land_mask_raster")
+path_to_mining_30sec_grid <- paste0("./global_miningcover_30sec_",release_version,".tif")
+raster::beginCluster(n = 12)
+system.time(raster::clusterR(x = raster::stack(list(tmp_file, path_to_land_mask_raster)), 
+                             fun = raster::overlay, args = list(fun = function(x, m) x * m), 
+                             filename = path_to_mining_30sec_grid, datatype = 'INT2U', options = c("compress=LZW"), overwrite = TRUE, verbose = TRUE))
+raster::endCluster()
