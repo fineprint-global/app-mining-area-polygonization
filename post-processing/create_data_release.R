@@ -11,22 +11,20 @@ library(units)
 library(nngeo)
 library(sf)
 library(raster)
-readRenviron(".Renviron")
+library(xml2)
+library(stringr)
+library(viridis)
+source("./R/gs_create_sld_color_palette.R")
+source("./R/gs_create_jenks_breaks_color_palette.R")
+
 
 # define release version ---------------------------------------------------------------
 release_version <- "v1"
+dir.create("./output", showWarnings = FALSE, recursive = TRUE)
 
 # --------------------------------------------------------------------------------------
-# get raw data from PostGIS database ---------------------------------------------------
-conn <- DBI::dbConnect(RPostgreSQL::PostgreSQL(),
-                       host = Sys.getenv("db_host"),
-                       port = Sys.getenv("db_port"),
-                       dbname = Sys.getenv("db_name"),
-                       user = Sys.getenv("db_user"),
-                       password = Sys.getenv("db_password"))
-
-raw_mining_polygons <- sf::st_read(conn, "mine_polygon")
-DBI::dbDisconnect(conn)
+# get raw data -------------------------------------------------------------------------
+raw_mining_polygons <- sf::st_read("./input/global_mining_polygons_v1r6_raw.gpkg")
 
 # --------------------------------------------------------------------------------------
 # clean overlaps, invalid shapes, and holes smaller than 1ha ---------------------------
@@ -44,18 +42,18 @@ mining_polygons <- raw_mining_polygons %>%
 
 # --------------------------------------------------------------------------------------
 # get world map from Eurostat  ---------------------------------------------------------
-if(!file.exists("./countries_polygon.gpkg")){
+if(!file.exists("./output/countries_polygon.gpkg")){
   download.file(url = "https://ec.europa.eu/eurostat/cache/GISCO/distribution/v2/countries/download/ref-countries-2016-01m.geojson.zip",
-                destfile = "./ref-countries-2016-01m.geojson.zip", mode = "w")
-  unzip(zipfile = "./ref-countries-2016-01m.geojson.zip", files = "CNTR_RG_01M_2016_4326.geojson", exdir = "./", overwrite = TRUE)
-  sf::st_read(dsn = "./CNTR_RG_01M_2016_4326.geojson") %>%
+                destfile = "./output/ref-countries-2016-01m.geojson.zip", mode = "w")
+  unzip(zipfile = "./output/ref-countries-2016-01m.geojson.zip", files = "CNTR_RG_01M_2016_4326.geojson", exdir = "./output", overwrite = TRUE)
+  sf::st_read(dsn = "./output/CNTR_RG_01M_2016_4326.geojson") %>%
     dplyr::select(ISO3_CODE, COUNTRY_NAME = NAME_ENGL) %>%
     lwgeom::st_make_valid() %>% 
     sf::st_cast("POLYGON") %>% 
-    sf::st_write(dsn = "./countries_polygon.gpkg", delete_dsn = TRUE)
+    sf::st_write(dsn = "./output/countries_polygon.gpkg", delete_dsn = TRUE)
 }
 
-world_map <- sf::st_read(dsn = "./countries_polygon.gpkg") %>% 
+world_map <- sf::st_read(dsn = "./output/countries_polygon.gpkg") %>% 
   sf::st_transform("+proj=laea +datum=WGS84")
 
 # --------------------------------------------------------------------------------------
@@ -107,7 +105,7 @@ mining_polygons <- mining_polygons %>%
 
 # --------------------------------------------------------------------------------------
 # write release data to GeoPackage -----------------------------------------------------
-path_to_mining_polygons <- paste0("./global_mining_polygons_",release_version,".gpkg")
+path_to_mining_polygons <- paste0("./output/global_mining_polygons_",release_version,".gpkg")
 sf::st_write(mining_polygons, layer = "mining_polygons", 
              dsn = path_to_mining_polygons, delete_dsn = TRUE)
 
@@ -121,26 +119,73 @@ mining_polygons %>%
   dplyr::summarise(AREA = sum(AREA)) %>% 
   dplyr::ungroup() %>% 
   dplyr::arrange(dplyr::desc(AREA)) %>% 
-  readr::write_csv(paste0("./global_mining_area_per_country_",release_version,".csv"))
+  readr::write_csv(paste0("./output/global_mining_area_per_country_",release_version,".csv"))
 
 # --------------------------------------------------------------------------------------
-# create 30sec global grid with a percentage of mining coverage per cell ---------------
+# create global 30arcsecond grid (approximately 1 kilometer) 
+# with the mining area weights per cell 
 # For help see: system("./calculate_area_weights.py -h")
-tmp_file <- tempfile(pattern = "file", tmpdir = tempdir(), fileext = ".tif")
+path_to_area_weights <- "./output/tmp_global_mining_area_weights_30arcsecond.tif"
+path_to_land_mask <- Sys.getenv(paste0("path_to_land_mask_30arcsecond"))
 system.time(system(paste0("./calculate_area_weights.py \\
                           -i ",path_to_mining_polygons," \\
-                          -o ",tmp_file," \\
+                          -o ",path_to_area_weights," \\
                           -xmin ",  -180," \\
                           -xmax ",   180," \\
                           -ymin ",   -90," \\
                           -ymax ",    90," \\
-                          -ncol ", 43200," \\
-                          -nrow ", 21600)))
+                          -ncol ",  43200," \\
+                          -nrow ",  21600)))
 
-path_to_land_mask_raster <- Sys.getenv("path_to_land_mask_raster")
-path_to_mining_30sec_grid <- paste0("./global_miningcover_30sec_",release_version,".tif")
+# mask land 30arcsecond grid (approximately 1 kilometer) 
+raster::rasterOptions(progress = "text")
 raster::beginCluster(n = 12)
-system.time(raster::clusterR(x = raster::stack(list(tmp_file, path_to_land_mask_raster)), 
-                             fun = raster::overlay, args = list(fun = function(x, m) x * m), 
-                             filename = path_to_mining_30sec_grid, datatype = 'INT2U', options = c("compress=LZW"), overwrite = TRUE, verbose = TRUE))
+
+r_prec <- raster::stack(raster::raster(path_to_land_mask), raster::raster(path_to_area_weights)) %>% 
+  raster::clusterR(raster::overlay, args = list(fun = function(m, w) m * w),
+                   filename = paste0("./output/global_miningarea_percentage_", release_version,"_30arcsecond.tif"), 
+                   datatype = 'INT1U', options = "compress=LZW", overwrite = TRUE, verbose = TRUE)
+
+r_area <- raster::stack(list(a = raster::area(r_prec), w = r_prec)) %>% 
+  raster::clusterR(raster::overlay, args = list(fun = function(a, w) a * w / 100),
+                   filename = paste0("./output/global_miningarea_", release_version,"_30arcsecond.tif"),
+                   datatype = 'FLT4S', options = "compress=LZW", overwrite = TRUE, verbose = TRUE)
+
+grid_levels <- tibble::tribble(        ~name, ~fact,
+                                "5arcminute",    10, # aggregation factor from 30arcsecond to 5arcminute (approximately 10 kilometer)
+                               "30arcminute",    60) # aggregation factor from 30arcsecond to 30arcminute (approximately 55 kilometer)
+
+for(g in 1:nrow(grid_levels) ){
+
+  fact <- grid_levels$fact[g]
+  grid_name <- grid_levels$name[g]
+  fname_perc <- paste0("./output/global_miningarea_percentage_",release_version,"_",grid_name,".tif")
+  fname_area <- paste0("./output/global_miningarea_",release_version,"_",grid_name,".tif")
+  
+  print(paste("Writing", grid_name, "grid to", fname_perc))
+  print(paste("Aggregation factor ", fact))
+  
+  print(paste("Aggregate grid cell area to ", grid_name))
+  r_agg_area <- raster::aggregate(r_area, fact = fact, fun = sum, na.rm = TRUE, 
+                                  filename = fname_area, datatype = 'FLT4S', options = "compress=LZW", overwrite = TRUE, verbose = TRUE)
+  
+  
+  r_agg_prec <- raster::stack(list(ta = raster::area(r_agg_area), ma = r_agg_area)) %>% 
+    raster::clusterR(raster::overlay, args = list(fun = function(ta, ma) round(ma / ta * 100)), 
+                     filename = fname_perc, datatype = 'INT1U', options = "compress=LZW", overwrite = TRUE, verbose = TRUE)
+
+}
+
+# Create Geoserver visualization layer 5arcminute grid (approximately 1 kilometer) 
+gs_file <- paste0("./output/global_miningarea_percentage_",release_version,"_",grid_name,"_gs.tif")
+paste0("./output/global_miningarea_percentage_",release_version,"_5arcminute.tif") %>% 
+  raster::raster() %>% 
+  raster::clusterR(raster::overlay, args = list(fun = function(w) w / w * w),
+                   filename = gs_file, datatype = 'INT1U', options = "compress=LZW", overwrite = TRUE, verbose = TRUE)
+
+print("Calculating Jenks Natural Breaks for visualization")
+gs_create_jenks_breaks_color_palette(src = gs_file, k = 10) %>% 
+  gs_create_sld_color_palette() %>% 
+  xml2::write_xml(stringr::str_replace_all(gs_file, ".tif", ".xml"))
+
 raster::endCluster()

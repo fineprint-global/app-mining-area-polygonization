@@ -1,15 +1,15 @@
 #!/usr/bin/python
 import sys
 import argparse
-import multiprocessing
 import rasterio
 import fiona
 import numpy as np 
 from shapely.geometry import shape, box, MultiPolygon
-from joblib import Parallel, delayed
 from rasterio import features
 from affine import Affine
-   
+import multiprocessing
+from functools import partial
+
 # initiate the parser
 parser = argparse.ArgumentParser()
 
@@ -35,10 +35,11 @@ def _rasterize_geom(geom, dim, affine_trans, all_touched):
     all_touched = all_touched)
   return out_array
 
-def _calculate_cell_coverage(r, c, affine_trans, geom):
-      
+def _calculate_cell_coverage(idx, affine_trans, geom):
+    # idx = (row, col)
+    
     # Construct the geometry of grid cell from its boundaries
-    window = ((r, r+1), (c, c+1))
+    window = ((idx[0], idx[0]+1), (idx[1], idx[1]+1))
     ((row_min, row_max), (col_min, col_max)) = window
     x_min, y_min = (col_min, row_max) * affine_trans
     x_max, y_max = (col_max, row_min) * affine_trans
@@ -49,16 +50,15 @@ def _calculate_cell_coverage(r, c, affine_trans, geom):
     cell_intersection = cell.intersection(geom)
 
     # calculate the percentage of cell covered by the polygon
-    cell_coverage = int(cell_intersection.area / cell.area * 100)
-      
+    cell_coverage = int(round(cell_intersection.area / cell.area * 100))
+
     return cell_coverage
 
-#def main(argv):
 if __name__ == "__main__":
    
    # convert arguments to numeric data types 
-   #GDAL:   (c, a, b, f, d, e)
-   #Affine: (a, b, c, d, e, f)
+   # GDAL:   (c, a, b, f, d, e)
+   # Affine: (a, b, c, d, e, f)
    xmin = float(args.xmin)
    xmax = float(args.xmax)
    ymin = float(args.ymin)
@@ -104,8 +104,11 @@ if __name__ == "__main__":
    
    # calculate percentage of coverage for cells touching polygons borders 
    num_cores = multiprocessing.cpu_count()
-   print "Calculate percentage of coverage for cells touching polygons borders using ", num_cores, " cores"
-   perc_raster[rows, cols] = Parallel(n_jobs=num_cores)(delayed(_calculate_cell_coverage)(i, j, affine_trans, geom) for i, j in idx)
+   print "Calculate percentage of coverage for", len(rows), "cells touching polygons borders using ", num_cores, " cores"
+   # perc_raster[rows, cols] = Parallel(n_jobs=num_cores)(delayed(_calculate_cell_coverage)(i, j, affine_trans, geom) for i, j in idx)
+   pool = multiprocessing.Pool(processes=num_cores)
+   perc_raster[rows, cols] = pool.map(partial(_calculate_cell_coverage, affine_trans=affine_trans, geom=geom), idx)
 
+   print "Writing results to ", args.outputfile
    with rasterio.open(args.outputfile, 'w', **profile) as dst:
        dst.write(perc_raster, 1)

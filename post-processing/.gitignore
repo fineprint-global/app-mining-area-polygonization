@@ -5,3 +5,4 @@
 *.geojson
 *.csv
 aux.R
+output
