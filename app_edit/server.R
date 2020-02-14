@@ -31,7 +31,7 @@ server <- function(input, output, session) {
                                              sprintf("SELECT COUNT(DISTINCT id) FROM updated;"))$count
     progress_all <- RPostgreSQL::dbGetQuery(pool,
                                             sprintf("SELECT COUNT(id) FROM to_update 
-                                                     WHERE to_check = FALSE;"))$count
+                                                     WHERE to_check = TRUE;"))$count
     
     if(progress_all != 0){
       shinyWidgets::updateProgressBar(session, id = "pb_user", value = progress_done, total = progress_all)
