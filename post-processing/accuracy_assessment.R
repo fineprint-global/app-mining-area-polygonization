@@ -6,7 +6,7 @@ library(sf)
 
 # --------------------------------------------------------------------------------------
 # get control points from PostGIS database ---------------------------------------------
-control_tbl <- sf::st_read("./validation_points_v1.gpkg") %>% 
+control_tbl <- sf::st_read("./input/validation_points_v1.gpkg") %>% 
   sf::st_drop_geometry() %>%
   tibble::as_tibble()
 
@@ -25,5 +25,5 @@ diag(err) / apply(err, 1, sum)
 sum(diag(err)) / sum(apply(err, 1, sum))
 
 # All accuracy metrics 
-caret::confusionMatrix(data = control_tbl$mapped, reference = control_tbl$reference, mode = "everything")
+caret::confusionMatrix(data = control_tbl$MAPPED, reference = control_tbl$REFERENCE, mode = "everything")
 
