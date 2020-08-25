@@ -162,3 +162,6 @@ get_other_cluster_polygons <- function(current_cluster_id = NULL,
 get_leaflet_marker_url <- function(color = "blue"){
   return(sprintf("https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-%s.png", color))
 }
+
+# # allow bookmarking (necessary to allow saving the state of the app in a URL)
+# enableBookmarking(store = "url")
