@@ -101,7 +101,7 @@ server <- function(input, output, session) {
     popup_template <- '
     <table>
     <thead>
-    <tr><th><a href="https://www.google.com/maps/search/%s %s mine" target="_blank">%s</a>&nbsp;</th><th>(fineprintID: %.0f)</th></tr>
+    <tr><th><a href="https://www.google.com/maps/search/%s %s mine" target="_blank">%s</a>&nbsp;</th><th>(fineprintID: %s)</th></tr>
     </thead>
     <tbody>
     <tr><td>Known As&nbsp;</td><td>%s</td></tr>
@@ -141,6 +141,15 @@ server <- function(input, output, session) {
       leaflet::addTiles(urlTemplate = "https://mts1.google.com/vt/lyrs=m&hl=en&src=app&x={x}&y={y}&z={z}&s=G", attribution = 'Google', group = "Google Map") %>%
       leaflet.extras::addBingTiles(apikey = Sys.getenv("BING_MAPS_API_KEY"),
                                    imagerySet = c("Aerial"), group = "Bing Satellite") %>%
+      # add FINEPRINT WMS polygons layer
+      leaflet::addWMSTiles("https://vps.fineprint.global/gs/geoserver/fineprint/wms?", 
+                           layers = "fineprint:mining_polygons",
+                           group = "[fineprint] Global-<br>scale mining areas",
+                           options = leaflet::WMSTileOptions(format = "image/png", 
+                                                             version = "1.1.0",
+                                                             transparent = TRUE,
+                                                             opacity = 0.5)) %>% 
+      # add current cluster buffer
       leaflet::addPolygons(data = current_cluster_buffer, group = "Cluster-buffer", fillColor = "#FF7F7F", weight = 2, opacity = 1, color = "white", dashArray = "3", fillOpacity = 0.15)
     
     if(!is.null(other_cluster_buffer)){
@@ -157,7 +166,7 @@ server <- function(input, output, session) {
                                            mine_name, fp_id, known_as, country, coordinate_accuracy, list_of_commodities, mine_type, operating_status, development_stage)) %>%
       leaflet::addLayersControl(
         baseGroups = c("Google Satellite", "Sentinel 2", "Google Map", "Bing Satellite"),
-        overlayGroups = c("Mine locations", "Cluster-buffer", "Other cluster-buffer", "Other cluster-polygons"), # "Current mine-area", 
+        overlayGroups = c("Mine locations", "Cluster-buffer", "Other cluster-buffer", "Other cluster-polygons", "[fineprint] Global-<br>scale mining areas"), # "Current mine-area", 
         options = leaflet::layersControlOptions(collapsed = FALSE),
         position = "bottomright"
       ) %>%
