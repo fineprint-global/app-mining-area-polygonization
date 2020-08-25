@@ -15,11 +15,13 @@ conn <- DBI::dbConnect(
 
 # --------------------------------------------------------------------------------------
 # read mines from files ----------------------------------------------------------------
-mine_point_tbl <- sf::st_read(dsn = "./db/input/non_tropical_mine_points_tbl.gpkg", 
+mine_point_tbl <- sf::st_read(dsn = "./db/input/snl_mines_selection_v2_tbl.gpkg", 
                                stringsAsFactors = FALSE) %>% 
+  # rename columns to fit db nomenclature
   dplyr::rename("geometry" = "geom",
-                "id_app_user" = "id_app_users",
-                "id_mine_cluster" = "id_mine_clusters")
+                "mine_name" = "mine",
+                "fp_id" = "id") %>% 
+  dplyr::select(-snl_id, -primary_commodity)
 
 # --------------------------------------------------------------------------------------
 # sort mines by country and commodities ------------------------------------------------
@@ -35,7 +37,7 @@ mine_cluster_tbl <- mine_point_tbl %>%
   dplyr::distinct()
 
 # --------------------------------------------------------------------------------------
-# create cluster table -----------------------------------------------------------------
+# create user table --------------------------------------------------------------------
 app_user_tbl <- mine_point_tbl %>% 
   sf::st_drop_geometry() %>% 
   dplyr::select(id = id_app_user) %>% 
