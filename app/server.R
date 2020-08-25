@@ -5,6 +5,7 @@ server <- function(input, output, session) {
   # initialize variables for context "server"
   current_cluster <- NULL
   current_cluster_polygons <- NULL
+  previous_polygons <- NULL # used to compare polygons across mapedit calls
   user_name <- Sys.getenv("SHINYPROXY_USERNAME")
   edit_module <- NULL
 
@@ -218,11 +219,12 @@ server <- function(input, output, session) {
     ## store all new polygons in an object
     new_polygons <- edit_module()$all
     
-    ## check if the new polygons are empty & deleted is empty, too - this means that nothing has been changed
-    ## then take the current_cluster_polygons
-    if(is.null(new_polygons) & is.null(edit_module()$deleted)){
-      new_polygons <- current_cluster_polygons
-    }
+    # # the lines below are only relevant in case of revisions, right now, there are just insertions
+    # ## check if the new polygons are empty & deleted is empty, too - this means that nothing has been changed
+    # ## then take the current_cluster_polygons
+    # if(is.null(new_polygons) & is.null(edit_module()$deleted)){
+    #   new_polygons <- current_cluster_polygons
+    # }
 
     # get ID of current cluster
     current_cluster_id <- current_cluster$id[1]
@@ -230,10 +232,14 @@ server <- function(input, output, session) {
     # combine all new_polygons to a multipolygon
     if(is.null(new_polygons)){ # no new polygons in the very first iteration
       multipolygon <- st_sfc(st_multipolygon())
-    } else if( length(row.names(new_polygons)) == 0){ # no new polygons after at last one has been added before
+    } else if( length(row.names(new_polygons)) == 0 | 
+               (length(new_polygons$X_leaflet_id) == length(previous_polygons$X_leaflet_id) &&
+                all(new_polygons$X_leaflet_id == previous_polygons$X_leaflet_id))){
+      # no new polygons after at least one has been added before
       multipolygon <- st_sfc(st_multipolygon())
     } else { # new polygons
       multipolygon <- sf::st_combine(new_polygons$geometry)
+      previous_polygons <<- new_polygons # reset previous polygons
     }
     
     # Changing the projection to longlat (which it is, but currently wrongly states merc)
