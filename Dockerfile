@@ -30,10 +30,8 @@ RUN apt-get update \
     sf \
     httr \
     lwgeom \
-    shinyWidgets
-
-# install custom version of mapedit
-RUN R -e "devtools::install_github('Gutschlhofer/mapedit', force = TRUE)"
+    shinyWidgets \
+    mapedit
 
 # Add shiny user
 RUN groupadd  shiny \
