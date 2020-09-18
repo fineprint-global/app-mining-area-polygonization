@@ -50,7 +50,7 @@ server <- function(input, output, session) {
                                                      user_name, user_name))$count
     
     if(progress_all != 0){
-      shinyWidgets::updateProgressBar(session, id = "pb_user", value = progress_done, total = progress_all)
+      shinyWidgets::updateProgressBar(session, id = "pb_user", value = progress_done/progress_all*100)
     }
     
     # Select sample following the id sequence. The samples have been previously are randomized in the database.
@@ -132,12 +132,12 @@ server <- function(input, output, session) {
     map <- leaflet::leaflet(options = leaflet::leafletOptions(crs = leaflet::leafletCRS("L.CRS.EPSG3857"))) %>%
       leaflet::addWMSTiles(
         "https://tiles.maps.eox.at/wms?",
-        layers = "s2cloudless_3857",
+        layers = "s2cloudless-2019_3857",
         group = "Sentinel 2",
         options = leaflet::WMSTileOptions(format = "image/jpeg", version = "1.1.1", transparent = FALSE),
         attribution = paste("Sentinel-2 cloudless - https://s2maps.eu by EOX",
                             "IT Services GmbH (Contains modified Copernicus",
-                            "Sentinel data 2016, 2017, & 2018)")) %>%
+                            "Sentinel data 2019)")) %>%
       leaflet::addTiles(urlTemplate = "https://mts1.google.com/vt/lyrs=s&hl=en&src=app&x={x}&y={y}&z={z}&s=G", attribution = 'Google', group = "Google Satellite") %>%
       leaflet::addTiles(urlTemplate = "https://mts1.google.com/vt/lyrs=m&hl=en&src=app&x={x}&y={y}&z={z}&s=G", attribution = 'Google', group = "Google Map") %>%
       leaflet.extras::addBingTiles(apikey = Sys.getenv("BING_MAPS_API_KEY"),
@@ -151,7 +151,7 @@ server <- function(input, output, session) {
                                                              transparent = TRUE,
                                                              opacity = 0.5)) %>% 
       # add current cluster buffer
-      leaflet::addPolygons(data = current_cluster_buffer, group = "Cluster-buffer", fillColor = "#FF7F7F", weight = 2, opacity = 1, color = "white", dashArray = "3", fillOpacity = 0.15)
+      leaflet::addPolygons(data = current_cluster_buffer, group = "Cluster-buffer", fillColor = "#FF7F7F", weight = 2, opacity = 1, color = "#FF7F7F", dashArray = "3", fillOpacity = 0)
     
     if(!is.null(other_cluster_buffer)){
       map <- map %>% leaflet::addPolygons(data = other_cluster_buffer, group = "Other cluster-buffer", fillColor = "#FFEDA0", weight = 2, opacity = 1, color = "white", dashArray = "3", fillOpacity = 0.15)
@@ -193,7 +193,7 @@ server <- function(input, output, session) {
 
     tryCatch({ # if the pool still exists, then get the connection from pool
       conn <- pool::poolCheckout(pool)
-      DBI::dbSendQuery(conn, sprintf("DELETE FROM mine_polygon WHERE status = 'HOLD' AND id_mine_cluster = '%.0f'", current_cluster_id))
+      DBI::dbSendQuery(conn, sprintf("DELETE FROM mine_polygon WHERE status = 'HOLD' AND id_app_user = '%s'", user_name))
       pool::poolReturn(conn)
     }, error = function(e) { # in case the pool is closed, make a new connection
       conn <- DBI::dbConnect(
@@ -204,7 +204,7 @@ server <- function(input, output, session) {
         user = Sys.getenv("db_user"),
         password = Sys.getenv("db_password")
       )
-      DBI::dbSendQuery(conn, sprintf("DELETE FROM mine_polygon WHERE status = 'HOLD' AND id_mine_cluster = '%.0f'", current_cluster_id))
+      DBI::dbSendQuery(conn, sprintf("DELETE FROM mine_polygon WHERE status = 'HOLD' AND id_app_user = '%s'", user_name))
       DBI::dbDisconnect(conn)
     }, finally = {
       message("HOLD-status of last mine was put off.")
@@ -261,7 +261,7 @@ server <- function(input, output, session) {
     # because DBI does not support pool, we need to check out a connection from the pool and return it after
     conn <- pool::poolCheckout(pool)
     sf::dbWriteTable(conn, "mine_polygon", new_entry, append = T)
-    DBI::dbSendQuery(conn, sprintf("DELETE FROM mine_polygon WHERE status = 'HOLD' AND id_mine_cluster = '%.0f'", current_cluster_id))
+    DBI::dbSendQuery(conn, sprintf("DELETE FROM mine_polygon WHERE status = 'HOLD' AND id_app_user = '%s'", user_name))
     pool::poolReturn(conn)
 
     # 2. reload module with new mine
