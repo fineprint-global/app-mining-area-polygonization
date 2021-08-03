@@ -30,7 +30,7 @@ sudo systemctl restart docker
 
 4. Check for any other docker containers running if everything is still fine.
 5. Create the docker-image for the 
-5. Create a config file: `sudo vi /etc/shinyproxy/application.yml` with the content of [application.yml](shinyproxy/application.yml)
+5. Create a config file: `sudo vi /etc/shinyproxy/application.yml` with the content of [application.yml](./application.yml)
 
 6. Add a firewall rule for `8080` to be accessible: `sudo ufw allow 8080`
 7. *You may want to check if `/etc/systemd/system/docker.service.d/override.conf` exists now. When implementing it on our VPS server, it disappeared for some reason and I had to re-run the restart commands after adding it again.*
