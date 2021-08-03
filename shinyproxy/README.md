@@ -2,7 +2,7 @@
 
 ## shinyproxy setup
 
-Follow the [shinyproxy Getting Started Guide](https://www.shinyproxy.io/getting-started/).
+Follow the [shinyproxy Getting Started Guide](https://www.shinyproxy.io/documentation/getting-started/).
 
 Here is a quick documentation and a few useful hints that were not that clear from the guide:
 
