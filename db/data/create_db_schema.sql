@@ -46,7 +46,6 @@ CREATE TABLE public.mine_polygon(
 	id_mine_cluster bigint NOT NULL,
 	id_app_user char(7) NOT NULL,
 	CONSTRAINT mine_polygon_pk PRIMARY KEY (id)
-
 );
 -- ddl-end --
 ALTER TABLE public.mine_polygon OWNER TO postgres;
@@ -64,9 +63,9 @@ CREATE INDEX idx_mine_polygon ON public.mine_polygon
 -- object: public.mine_point | type: TABLE --
 -- DROP TABLE IF EXISTS public.mine_point CASCADE;
 CREATE TABLE public.mine_point(
-	id bigserial NOT NULL,
+	id char(11) NOT NULL,
 	geometry geometry(POINT) NOT NULL,
-	fp_id serial NOT NULL,
+	fp_id char(11) NOT NULL,
 	mine_name varchar(50),
 	country varchar(100),
 	list_of_commodities varchar(250),
