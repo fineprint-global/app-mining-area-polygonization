@@ -2,6 +2,9 @@ library(sf)
 library(DBI)
 library(tidyverse)
 
+# this fixes a bug when the db insert of mine_point would unexpectedly crash
+sf_use_s2(FALSE)
+
 # --------------------------------------------------------------------------------------
 # connect PostGIS mine vector database -------------------------------------------------
 conn <- DBI::dbConnect(
