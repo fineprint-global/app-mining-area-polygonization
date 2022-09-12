@@ -17,7 +17,7 @@
 library(shiny)
 library(tidyverse)
 library(sf)
-# devtools::install_github("Gutschlhofer/mapedit", force = TRUE)
+# devtools::install_github("r-spatial/mapedit", force = TRUE)
 library(mapedit) # make sure the modified version of mapedit is used
 library(shiny)
 library(shinyjs)
@@ -32,7 +32,7 @@ library(lwgeom)
 
 # set current version and revision
 VERSION <- 1
-REVISION <- 1
+REVISION <- 0
 
 # connect PostGIS database via a pool object for better Shiny behaviour ------------------------------------------------
 pool <- pool::dbPool(
