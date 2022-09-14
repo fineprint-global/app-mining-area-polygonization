@@ -166,7 +166,7 @@ server <- function(input, output, session) {
                           popup = ~sprintf(popup_template, mine_name, country, # the first two variables for the maps search
                                            mine_name, fp_id, known_as, country, coordinate_accuracy, list_of_commodities, mine_type, operating_status, development_stage)) %>%
       leaflet::addLayersControl(
-        baseGroups = c("Google Satellite", "Sentinel 2", "Google Map", "Bing Satellite"),
+        baseGroups = c("Sentinel 2", "Google Satellite", "Google Map", "Bing Satellite"),
         overlayGroups = c("Mine locations", "Cluster-buffer", "Other cluster-buffer", "Other cluster-polygons", "Mining polygons v2"), # "Current mine-area", 
         options = leaflet::layersControlOptions(collapsed = FALSE),
         position = "bottomright"
